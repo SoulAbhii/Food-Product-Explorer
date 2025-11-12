@@ -1,0 +1,18 @@
+.product-detail {
+  max-width: 600px;
+  margin: 2rem auto;
+  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+.product-detail img {
+  max-width: 300px;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+.product-detail p {
+  margin: 0.5rem 0;
+  color: #333;
+}

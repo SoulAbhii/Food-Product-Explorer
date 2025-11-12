@@ -1,0 +1,110 @@
+.container {
+  padding: 2rem;
+  color: #333;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Controls layout */
+.controls {
+  margin-bottom: 2rem;
+    position: relative;
+  z-index: 10; /* Make controls (dropdowns) appear above cards */
+  background: #fff;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.controls-row input,
+.controls-row select,
+.controls-row button {
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: all 0.2s ease;
+  z-index: 20;
+  position: relative;
+}
+
+.controls-row input:focus,
+.controls-row select:focus {
+  border-color: #f54c18;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+.controls-row button {
+  background-color: #f54c18;
+  color: white;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.controls-row button:hover {
+  background-color: #f57b18;
+}
+
+/* Products Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.5rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem;
+  color: #777;
+  font-size: 1.1rem;
+}
+
+.load-more {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.load-more button {
+  background-color: #f54c18;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.load-more button:hover {
+  background-color: #f54c18;
+}
+
+select {
+  color: #333; /* text color of selected value */
+  background-color: #ffffff; /* dropdown background */
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* For dropdown options */
+option {
+  color: #222222; /* text color inside dropdown list */
+  background-color: #f9f9f9;
+}
+
+option:hover {
+  background-color: #f1540a; /* hover effect */
+  color: #000;
+}

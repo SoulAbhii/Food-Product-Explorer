@@ -1,0 +1,13 @@
+/* 🌐 Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+}
+body {
+  background: #f9fafb7c;
+  color: #3a2929;
+  line-height: 1.6;
+}
+
