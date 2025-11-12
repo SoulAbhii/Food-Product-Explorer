@@ -1,20 +1,72 @@
-<<<<<<< HEAD
-# React + Vite
+# 🥗 Food Product Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React.js web application that allows users to search and explore food products using the **Open Food Facts API**.  
+Users can browse by category, sort products, or even look up items using a **barcode number**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- 🔍 **Search by Product Name** – Quickly find food products by typing their name.
+- 🏷️ **Filter by Category** – Choose from a wide range of product categories.
+- 🍔 **Sort Products** – Sort by name or nutrition grade (A → E or E → A).
+- 📦 **Barcode Search** – Enter a barcode number to get product details instantly.
+- 🧾 **Flipkart-Style Product Cards** – Clean, modern UI for easy browsing.
+- 📱 **Responsive Design** – Works perfectly on desktop and mobile.
+- ⚡ **Pagination / Load More** – Load products dynamically without refreshing.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-# Food-Product-Explorer
->>>>>>> 1ec7902640d69450e256338f3f4c926dede1b132
+| Technology | Description |
+|-------------|-------------|
+| **React.js (Vite)** | Frontend Framework |
+| **React Router** | Page Navigation |
+| **React Select** | Custom Dropdowns |
+| **CSS / Flexbox / Grid** | Styling & Layout |
+| **Open Food Facts API** | Public food data source |
+
+---
+
+## 📁 Folder Structure
+
+food-product-explorer/
+│
+├── src/
+│ ├── api.js # API calls to Open Food Facts
+│ ├── components/
+│ │ ├── Home.jsx # Main page (search, filters, product list)
+│ │ ├── ProductCard.jsx # Individual product cards
+│ │ ├── ProductDetail.jsx# Product details page
+│ │ ├── Home.css # Styles for main page
+│ │ ├── ProductCard.css # Flipkart-style product cards
+│ │ ├── ProductDetail.css# Detail page styling
+│ ├── App.jsx # App routing
+│ ├── main.jsx # React entry file
+│
+├── package.json
+├── vite.config.js
+├── README.md
+└── index.html
+
+
+## ⚙️ Installation & Setup
+
+Follow these steps to run the project locally:
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/SoulAbhii/Food-Product-Explorer.git
+2️⃣ Navigate into the folder
+cd Food-Product-Explorer
+
+3️⃣ Install dependencies
+npm install
+
+4️⃣ Run the development server
+npm run dev
+
+
+Now open your browser and visit 👉 http://localhost:5173
