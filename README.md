@@ -4,6 +4,10 @@ A React.js web application that allows users to search and explore food products
 Users can browse by category, sort products, or even look up items using a **barcode number**.
 
 ---
+## 🚀 Live Demo
+
+👉 **[View the app on Netlify](https://food-product-explorer-abhi.netlify.app/)**  
+
 
 ## 🚀 Features
 
