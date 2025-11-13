@@ -5,16 +5,16 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 0 12px rgba(0,0,0,0.1);
-   position: relative;
-     padding: 60px 20px 20px;
-  text-align: center;
-
+  position: relative;
+  padding: 60px 20px 20px;
 }
+
 .product-detail img {
   max-width: 300px;
   border-radius: 8px;
   margin: 1rem 0;
 }
+
 .product-detail p {
   margin: 0.5rem 0;
   color: #333;
@@ -35,11 +35,24 @@
   text-decoration: none;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: background-color 0.2s ease, transform 0.2s ease;
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px solid #fff;
+  cursor: pointer;
 }
 
 .back-circle:hover {
   background-color: #d84315;
   transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
 }
 
+/* Optional: Add a home icon instead of arrow */
+.back-circle.home-icon::before {
+  content: "🏠";
+}
 
+/* Optional: Add a different icon style */
+.back-circle.arrow-icon::before {
+  content: "←";
+}

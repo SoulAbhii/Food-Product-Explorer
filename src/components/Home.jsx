@@ -18,120 +18,153 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const [search, setSearch] = useState(sessionStorage.getItem('homeSearch') || "");
+  const [search, setSearch] = useState("");
   const [barcode, setBarcode] = useState("");
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState(null);
-  const [sort, setSort] = useState(sessionStorage.getItem('homeSort') || "");
+  const [sort, setSort] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
-  const initialLoadDone = useRef(false);
+  const isInitialMount = useRef(true);
 
-  // Fetch categories and load saved state
+  // Initialize component - run only once on mount
   useEffect(() => {
-    let mounted = true;
-    fetchCategories(1, 200)
-      .then((data) => {
-        if (!mounted) return;
-        if (data && data.tags) {
-          setCategories(data.tags);
-          // Restore filters from navigation state or sessionStorage
-          let savedSearch = location.state?.filters?.search || sessionStorage.getItem('homeSearch') || "";
-          let savedCategoryStr = location.state?.filters?.category || sessionStorage.getItem('homeCategory');
-          let savedSort = location.state?.filters?.sort || sessionStorage.getItem('homeSort') || "";
-          let savedCategory = null;
-          if (savedCategoryStr) {
-            try {
-              savedCategory = JSON.parse(savedCategoryStr);
-            } catch (e) {
-              // Ignore invalid JSON
-            }
-          }
-          setSearch(savedSearch);
-          setCategory(savedCategory);
-          setSort(savedSort);
-        }
-      })
-      .then(() => {
-        // After categories are loaded, load saved state
-        let savedSearch = location.state?.filters?.search || sessionStorage.getItem('homeSearch') || "";
-        let savedCategoryStr = location.state?.filters?.category || sessionStorage.getItem('homeCategory');
-        let savedSort = location.state?.filters?.sort || sessionStorage.getItem('homeSort') || "";
-        let savedCategory = null;
-        if (savedCategoryStr) {
-          try {
-            savedCategory = JSON.parse(savedCategoryStr);
-          } catch (e) {
-            // Ignore invalid JSON
-          }
-        }
-        setSearch(savedSearch);
-        setCategory(savedCategory);
-        setSort(savedSort);
+    const initializeComponent = async () => {
+      // Load saved state from sessionStorage
+      const savedState = loadStateFromStorage();
+      
+      // Apply saved state
+      if (savedState.search) setSearch(savedState.search);
+      if (savedState.category) setCategory(savedState.category);
+      if (savedState.sort) setSort(savedState.sort);
+      if (savedState.products.length > 0) {
+        setProducts(savedState.products);
+        setPage(savedState.page);
+        setHasMore(savedState.hasMore);
+      }
 
-        const savedProducts = sessionStorage.getItem('homeProducts');
-        const savedPage = sessionStorage.getItem('homePage');
-        const savedHasMore = sessionStorage.getItem('homeHasMore');
-
-        if (savedProducts && savedPage && savedHasMore && !savedSearch && !savedCategory && !savedSort) {
-          setProducts(JSON.parse(savedProducts));
-          setPage(parseInt(savedPage));
-          setHasMore(savedHasMore === 'true');
-        } else {
-          // Load products based on current filters (which include saved ones)
-          loadProducts(1, true);
+      // Fetch categories
+      try {
+        const categoriesData = await fetchCategories(1, 200);
+        if (categoriesData?.tags) {
+          setCategories(categoriesData.tags);
         }
-        initialLoadDone.current = true;
-      })
-      .catch(() => {});
-    return () => (mounted = false);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+
+      // If no saved products, load initial products
+      if (savedState.products.length === 0) {
+        await loadProducts(1, true);
+      }
+
+      isInitialMount.current = false;
+    };
+
+    initializeComponent();
   }, []);
 
-  // Load products whenever search or category changes
+  // Load products when filters change (after initial mount)
   useEffect(() => {
-    if (search || category || sort) {
-      setProducts([]);
-      setPage(1);
-      setHasMore(true);
-      loadProducts(1, true);
+    if (!isInitialMount.current) {
+      const loadWithNewFilters = async () => {
+        setProducts([]);
+        setPage(1);
+        setHasMore(true);
+        await loadProducts(1, true);
+      };
+      loadWithNewFilters();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, sort]);
+  }, [search, category?.value, sort]);
 
-  // Save filters to sessionStorage
+  // Save state to sessionStorage whenever relevant state changes
   useEffect(() => {
-    sessionStorage.setItem('homeSearch', search);
-  }, [search]);
+    if (!isInitialMount.current) {
+      saveStateToStorage();
+    }
+  }, [products, page, hasMore, search, category, sort]);
 
-  useEffect(() => {
-    sessionStorage.setItem('homeCategory', JSON.stringify(category));
-  }, [category]);
+  // Helper function to load state from sessionStorage
+  const loadStateFromStorage = () => {
+    try {
+      const savedSearch = sessionStorage.getItem('homeSearch') || "";
+      const savedCategoryStr = sessionStorage.getItem('homeCategory');
+      const savedSort = sessionStorage.getItem('homeSort') || "";
+      const savedProducts = sessionStorage.getItem('homeProducts');
+      const savedPage = sessionStorage.getItem('homePage');
+      const savedHasMore = sessionStorage.getItem('homeHasMore');
 
-  useEffect(() => {
-    sessionStorage.setItem('homeSort', sort);
-  }, [sort]);
+      let savedCategory = null;
+      if (savedCategoryStr && savedCategoryStr !== "null") {
+        try {
+          savedCategory = JSON.parse(savedCategoryStr);
+        } catch (e) {
+          console.error("Error parsing saved category:", e);
+        }
+      }
+
+      return {
+        search: savedSearch,
+        category: savedCategory,
+        sort: savedSort,
+        products: savedProducts ? JSON.parse(savedProducts) : [],
+        page: savedPage ? parseInt(savedPage) : 1,
+        hasMore: savedHasMore ? savedHasMore === 'true' : true
+      };
+    } catch (error) {
+      console.error("Error loading state from storage:", error);
+      return {
+        search: "",
+        category: null,
+        sort: "",
+        products: [],
+        page: 1,
+        hasMore: true
+      };
+    }
+  };
+
+  // Helper function to save state to sessionStorage
+  const saveStateToStorage = () => {
+    try {
+      sessionStorage.setItem('homeSearch', search);
+      sessionStorage.setItem('homeCategory', JSON.stringify(category));
+      sessionStorage.setItem('homeSort', sort);
+      sessionStorage.setItem('homeProducts', JSON.stringify(products));
+      sessionStorage.setItem('homePage', page.toString());
+      sessionStorage.setItem('homeHasMore', hasMore.toString());
+    } catch (error) {
+      console.error("Error saving state to storage:", error);
+    }
+  };
 
   async function loadProducts(p = page, replace = false) {
+    if (loading) return;
+    
     setLoading(true);
     try {
       let data;
-      if (search) data = await searchProductsByName(search, p, 24);
-      else if (category) data = await fetchProductsByCategory(category.value, p, 24);
-      else data = await fetchProductsGeneric(p, 24);
+      if (search) {
+        data = await searchProductsByName(search, p, 24);
+      } else if (category) {
+        data = await fetchProductsByCategory(category.value, p, 24);
+      } else {
+        data = await fetchProductsGeneric(p, 24);
+      }
 
       const items = data?.products || [];
-      setProducts((prev) => (replace ? items : [...prev, ...items]));
+      
+      if (replace) {
+        setProducts(items);
+      } else {
+        setProducts(prev => [...prev, ...items]);
+      }
+      
       setHasMore(items.length === 24);
 
-      // Save to sessionStorage only for initial loads (no filters)
-      if (!search && !category && !sort && replace) {
-        sessionStorage.setItem('homeProducts', JSON.stringify(replace ? items : [...(JSON.parse(sessionStorage.getItem('homeProducts') || '[]')), ...items]));
-        sessionStorage.setItem('homePage', p.toString());
-        sessionStorage.setItem('homeHasMore', (items.length === 24).toString());
-      }
     } catch (err) {
-      console.error(err);
+      console.error("Error loading products:", err);
       setHasMore(false);
     } finally {
       setLoading(false);
@@ -141,7 +174,7 @@ export default function Home() {
   function handleLoadMore() {
     const next = page + 1;
     setPage(next);
-    loadProducts(next);
+    loadProducts(next, false);
   }
 
   // Barcode search
@@ -157,6 +190,28 @@ export default function Home() {
         }
       })
       .catch(() => alert("Error fetching product by barcode"));
+  }
+
+  // Clear all filters
+  function handleClearFilters() {
+    setSearch("");
+    setCategory(null);
+    setSort("");
+    setBarcode("");
+    setProducts([]);
+    setPage(1);
+    setHasMore(true);
+    
+    // Clear session storage
+    sessionStorage.removeItem('homeSearch');
+    sessionStorage.removeItem('homeCategory');
+    sessionStorage.removeItem('homeSort');
+    sessionStorage.removeItem('homeProducts');
+    sessionStorage.removeItem('homePage');
+    sessionStorage.removeItem('homeHasMore');
+    
+    // Load default products
+    loadProducts(1, true);
   }
 
   // Sorting
@@ -203,7 +258,7 @@ export default function Home() {
       ...base,
       backgroundColor:
         state.isFocused && state.data.value === ""
-          ? "#f54c18" // hover for “All categories” or “Sort by”
+          ? "#f54c18"
           : state.isFocused
           ? "#f54c18"
           : "#fff",
@@ -271,6 +326,13 @@ export default function Home() {
             onChange={(e) => setBarcode(e.target.value)}
           />
           <button type="submit">Search Barcode</button>
+          
+          {/* Clear Filters Button */}
+          {(search || category || sort) && (
+            <button type="button" onClick={handleClearFilters} className="clear-btn">
+              Clear Filters
+            </button>
+          )}
         </form>
       </section>
 
