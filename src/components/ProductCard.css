@@ -12,7 +12,7 @@
   align-items: center;
   text-align: left;
   position: relative;
-  padding-bottom: 28px; /* 👈 add space for the grade bar */
+  padding-bottom: 28px; /* space for the grade bar */
 }
 
 .product-card:hover {
@@ -50,8 +50,7 @@
   margin: 2px 0;
 }
 
-/* ⭐ Ratings or Nutrition Badge (Flipkart-style chip) */
-/* 🧃 Nutrition Grade Bottom Bar (Flipkart Style) */
+/* ⭐ Nutrition Grade Bottom Bar (Flipkart Style) */
 .badge {
   position: absolute;
   bottom: 0;
@@ -64,6 +63,7 @@
   padding: 6px 0;
   border-radius: 0;
 }
+
 .badge.a {
   background: #16a34a;
 }
@@ -78,4 +78,55 @@
 }
 .badge.e {
   background: #ef4444;
+}
+
+/* 🧱 Product Grid Layout */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+  justify-items: center; /* ✅ Centers cards horizontally */
+  align-items: start;
+  padding: 20px 10px;
+}
+
+/* 📱 Responsive Adjustments */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    justify-content: center; /* centers grid container */
+  }
+
+  .product-card {
+    width: 90%;
+    max-width: 260px;
+  }
+
+  .product-card img {
+    height: 160px;
+  }
+
+  .product-card h3 {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr; /* one card per row */
+    justify-items: center;
+  }
+
+  .product-card {
+    width: 90%;
+    max-width: 280px;
+  }
+
+  .product-card img {
+    height: 140px;
+  }
+
+  .product-card h3 {
+    font-size: 0.85rem;
+  }
 }

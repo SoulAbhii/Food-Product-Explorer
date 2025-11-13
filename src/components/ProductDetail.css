@@ -4,8 +4,11 @@
   text-align: center;
   background: #fff;
   border-radius: 12px;
-  padding: 2rem;
   box-shadow: 0 0 12px rgba(0,0,0,0.1);
+   position: relative;
+     padding: 60px 20px 20px;
+  text-align: center;
+
 }
 .product-detail img {
   max-width: 300px;
@@ -16,3 +19,27 @@
   margin: 0.5rem 0;
   color: #333;
 }
+
+.back-circle {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f54c18;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.back-circle:hover {
+  background-color: #d84315;
+  transform: scale(1.05);
+}
+
+

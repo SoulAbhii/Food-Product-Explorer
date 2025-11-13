@@ -1,11 +1,13 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProductByBarcode } from "../api";
+import { FiArrowLeft } from "react-icons/fi";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
   const { barcode } = useParams();
   const [product, setProduct] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadProduct() {
@@ -23,7 +25,11 @@ export default function ProductDetail() {
 
   return (
     <div className="product-detail">
-      <Link to="/">← Back</Link>
+      {/* Circular Back Button */}
+      <button className="back-circle" onClick={() => navigate(-1)}>
+        <FiArrowLeft size={20} />
+      </button>
+
       <h1>{product.product_name}</h1>
       <img src={product.image_front_url} alt={product.product_name} />
       <p><strong>Brand:</strong> {product.brands || "N/A"}</p>

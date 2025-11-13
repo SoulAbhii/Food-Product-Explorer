@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import Select from "react-select";
 
 import {
@@ -9,7 +9,7 @@ import {
   getProductByBarcode,
 } from "../api";
 import ProductCard from "./ProductCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../components/Home.css";
 
 export default function Home() {
@@ -18,23 +18,71 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(sessionStorage.getItem('homeSearch') || "");
   const [barcode, setBarcode] = useState("");
   const [categories, setCategories] = useState([]);
-  const [category, setCategory] = useState("");
-  const [sort, setSort] = useState("");
+  const [category, setCategory] = useState(null);
+  const [sort, setSort] = useState(sessionStorage.getItem('homeSort') || "");
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialLoadDone = useRef(false);
 
-  // Fetch categories
+  // Fetch categories and load saved state
   useEffect(() => {
     let mounted = true;
     fetchCategories(1, 200)
       .then((data) => {
         if (!mounted) return;
         if (data && data.tags) {
-          setCategories(data.tags.slice(0, 50));
+          setCategories(data.tags);
+          // Restore filters from navigation state or sessionStorage
+          let savedSearch = location.state?.filters?.search || sessionStorage.getItem('homeSearch') || "";
+          let savedCategoryStr = location.state?.filters?.category || sessionStorage.getItem('homeCategory');
+          let savedSort = location.state?.filters?.sort || sessionStorage.getItem('homeSort') || "";
+          let savedCategory = null;
+          if (savedCategoryStr) {
+            try {
+              savedCategory = JSON.parse(savedCategoryStr);
+            } catch (e) {
+              // Ignore invalid JSON
+            }
+          }
+          setSearch(savedSearch);
+          setCategory(savedCategory);
+          setSort(savedSort);
         }
+      })
+      .then(() => {
+        // After categories are loaded, load saved state
+        let savedSearch = location.state?.filters?.search || sessionStorage.getItem('homeSearch') || "";
+        let savedCategoryStr = location.state?.filters?.category || sessionStorage.getItem('homeCategory');
+        let savedSort = location.state?.filters?.sort || sessionStorage.getItem('homeSort') || "";
+        let savedCategory = null;
+        if (savedCategoryStr) {
+          try {
+            savedCategory = JSON.parse(savedCategoryStr);
+          } catch (e) {
+            // Ignore invalid JSON
+          }
+        }
+        setSearch(savedSearch);
+        setCategory(savedCategory);
+        setSort(savedSort);
+
+        const savedProducts = sessionStorage.getItem('homeProducts');
+        const savedPage = sessionStorage.getItem('homePage');
+        const savedHasMore = sessionStorage.getItem('homeHasMore');
+
+        if (savedProducts && savedPage && savedHasMore && !savedSearch && !savedCategory && !savedSort) {
+          setProducts(JSON.parse(savedProducts));
+          setPage(parseInt(savedPage));
+          setHasMore(savedHasMore === 'true');
+        } else {
+          // Load products based on current filters (which include saved ones)
+          loadProducts(1, true);
+        }
+        initialLoadDone.current = true;
       })
       .catch(() => {});
     return () => (mounted = false);
@@ -42,24 +90,46 @@ export default function Home() {
 
   // Load products whenever search or category changes
   useEffect(() => {
-    setProducts([]);
-    setPage(1);
-    setHasMore(true);
-    loadProducts(1, true);
+    if (search || category || sort) {
+      setProducts([]);
+      setPage(1);
+      setHasMore(true);
+      loadProducts(1, true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category, sort]);
+
+  // Save filters to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('homeSearch', search);
+  }, [search]);
+
+  useEffect(() => {
+    sessionStorage.setItem('homeCategory', JSON.stringify(category));
+  }, [category]);
+
+  useEffect(() => {
+    sessionStorage.setItem('homeSort', sort);
+  }, [sort]);
 
   async function loadProducts(p = page, replace = false) {
     setLoading(true);
     try {
       let data;
       if (search) data = await searchProductsByName(search, p, 24);
-      else if (category) data = await fetchProductsByCategory(category, p, 24);
+      else if (category) data = await fetchProductsByCategory(category.value, p, 24);
       else data = await fetchProductsGeneric(p, 24);
 
       const items = data?.products || [];
       setProducts((prev) => (replace ? items : [...prev, ...items]));
       setHasMore(items.length === 24);
+
+      // Save to sessionStorage only for initial loads (no filters)
+      if (!search && !category && !sort && replace) {
+        sessionStorage.setItem('homeProducts', JSON.stringify(replace ? items : [...(JSON.parse(sessionStorage.getItem('homeProducts') || '[]')), ...items]));
+        sessionStorage.setItem('homePage', p.toString());
+        sessionStorage.setItem('homeHasMore', (items.length === 24).toString());
+      }
     } catch (err) {
       console.error(err);
       setHasMore(false);
@@ -181,8 +251,8 @@ export default function Home() {
           <Select
             options={categoryOptions}
             styles={customStyles}
-            value={categoryOptions.find((opt) => opt.value === category)}
-            onChange={(opt) => setCategory(opt.value)}
+            value={category}
+            onChange={(opt) => setCategory(opt)}
             placeholder="Select category"
           />
 
@@ -206,12 +276,15 @@ export default function Home() {
 
       {/* Product Grid */}
       <section className="product-grid">
-        {sortedProducts.length === 0 && !loading && (
+        {loading && products.length === 0 ? (
+          <div className="loading">Loading products...</div>
+        ) : sortedProducts.length === 0 && !loading ? (
           <div className="empty">No products found.</div>
+        ) : (
+          sortedProducts.map((p) => (
+            <ProductCard key={p.code || Math.random()} product={p} />
+          ))
         )}
-        {sortedProducts.map((p) => (
-          <ProductCard key={p.code || Math.random()} product={p} />
-        ))}
       </section>
 
       {/* Load More */}
